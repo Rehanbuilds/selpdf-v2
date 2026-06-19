@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, degrees } from 'pdf-lib';
 
 export async function mergePDFs(files: File[]): Promise<Uint8Array> {
   const mergedPdf = await PDFDocument.create();
@@ -47,7 +47,7 @@ export async function rotatePDF(file: File, rotation: 90 | 180 | 270): Promise<U
     // Rotation should be set directly as a number (90, 180, 270, 0)
     const currentRotation = page.getRotation().angle || 0;
     const newRotation = (currentRotation + rotation) % 360;
-    page.setRotation({ angle: newRotation });
+    page.setRotation(degrees(newRotation));
   }
 
   return await pdf.save();
@@ -71,8 +71,19 @@ export async function compressPDF(file: File): Promise<Uint8Array> {
 }
 
 export function downloadPDF(data: Uint8Array, filename: string) {
-  console.log('[v0] Downloading PDF:', filename);
-  const blob = new Blob([data], { type: 'application/pdf' });
+  console.log('[v0] Downloading file:', filename);
+  const ext = filename.split('.').pop()?.toLowerCase();
+  const mimeType = 
+    ext === 'pdf' ? 'application/pdf' :
+    ext === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
+    ext === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+    ext === 'pptx' ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' :
+    ext === 'zip' ? 'application/zip' :
+    ext === 'png' ? 'image/png' :
+    ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
+    'application/octet-stream';
+    
+  const blob = new Blob([data as any], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -85,7 +96,7 @@ export function downloadPDF(data: Uint8Array, filename: string) {
   setTimeout(() => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, 100);
+  }, 1000);
   
   console.log('[v0] PDF download triggered successfully');
 }

@@ -34,14 +34,33 @@ export default function PowerPointToPDFPage() {
       const file = files[0].file;
       const arrayBuffer = await file.arrayBuffer();
       
-      // Create PDF from PowerPoint
-      // This is a simplified implementation
-      setProgress(50);
+      setProgress(30);
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(arrayBuffer);
       
-      const pdfData = new Uint8Array(arrayBuffer);
+      // Extract text from slides
+      const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
+      
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF({ orientation: 'landscape' });
+      
+      for (let i = 0; i < slideFiles.length; i++) {
+        if (i > 0) doc.addPage();
+        
+        const slideXml = await zip.files[slideFiles[i]].async('string');
+        const textMatches = slideXml.match(/<a:t>([\s\S]*?)<\/a:t>/g);
+        let slideText = "";
+        if (textMatches) {
+          slideText = textMatches.map(t => t.replace(/<\/?a:t>/g, '')).join(' ');
+        }
+        
+        const splitText = doc.splitTextToSize(slideText || `Slide ${i + 1}`, 280);
+        doc.text(splitText, 10, 20);
+      }
       
       setProgress(80);
-      setProcessedPDF(pdfData);
+      const pdfData = doc.output('arraybuffer');
+      setProcessedPDF(new Uint8Array(pdfData));
       setShowFilenameDialog(true);
       
       setProgress(100);

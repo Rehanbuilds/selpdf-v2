@@ -10,6 +10,7 @@ import { FileList } from '@/components/pdf/file-list';
 import { ProcessingIndicator } from '@/components/pdf/processing-indicator';
 import { FilenameDialog } from '@/components/pdf/filename-dialog';
 import { usePDFStore } from '@/lib/store/pdf-store';
+import { extractTextFromPDF } from '@/lib/pdf/convert';
 import { downloadPDF } from '@/lib/pdf/utils';
 
 export default function PDFToPowerPointPage() {
@@ -31,20 +32,21 @@ export default function PDFToPowerPointPage() {
       console.log('[v0] Starting PDF to PowerPoint conversion');
       setProgress(10);
       
-      // For now, we'll create a placeholder implementation
-      // In production, you would use a library like libreoffice or a conversion API
       const file = files[0].file;
-      const arrayBuffer = await file.arrayBuffer();
+      const pagesText = await extractTextFromPDF(file);
       
-      // Create a simple PPTX with PDF content (base implementation)
-      // This is a simplified version - actual conversion would require more sophisticated processing
       setProgress(50);
+      const pptxgen = (await import('pptxgenjs')).default;
+      const pres = new pptxgen();
       
-      // For now, return a placeholder indicating the feature
-      const pptxData = new Uint8Array(arrayBuffer);
+      pagesText.forEach((text) => {
+        const slide = pres.addSlide();
+        slide.addText(text, { x: 0.5, y: 0.5, w: '90%', h: '90%', fontSize: 14, align: 'left', valign: 'top' });
+      });
       
       setProgress(80);
-      setProcessedPDF(pptxData);
+      const pptxData = await pres.write({ outputType: 'arraybuffer' }) as ArrayBuffer;
+      setProcessedPDF(new Uint8Array(pptxData));
       setShowFilenameDialog(true);
       
       setProgress(100);

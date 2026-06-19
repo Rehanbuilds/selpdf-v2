@@ -64,7 +64,8 @@ export default function HtmlToPdfPage() {
     if (!htmlContent.trim()) { setError('Please enter some HTML content.'); return; }
     setIsProcessing(true); setError(null); setProgress(0);
     try {
-      const { PDFDocument } = await import('pdf-lib');
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
       const size = PAGE_SIZES[pageSize];
       setProgress(10);
 
@@ -79,38 +80,39 @@ export default function HtmlToPdfPage() {
       await new Promise(r => setTimeout(r, 800));
       setProgress(30);
 
-      const contentHeight = Math.max(oDoc.body.scrollHeight, oDoc.documentElement.scrollHeight);
-      const pageCount = Math.max(1, Math.ceil(contentHeight / size.height));
-      const pdfDoc = await PDFDocument.create();
-
-      for (let i = 0; i < pageCount; i++) {
-        setProgress(30 + (i / pageCount) * 60);
-        offscreen.contentWindow?.scrollTo(0, i * size.height);
-        await new Promise(r => setTimeout(r, 300));
-
-        const canvas = document.createElement('canvas');
-        const sc = 2;
-        canvas.width = size.width * sc; canvas.height = size.height * sc;
-        const ctx = canvas.getContext('2d')!;
-        ctx.scale(sc, sc); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size.width, size.height);
-
-        const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${size.width}" height="${size.height}"><foreignObject width="100%" height="100%">${new XMLSerializer().serializeToString(oDoc.documentElement)}</foreignObject></svg>`;
-        const url = URL.createObjectURL(new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' }));
-        const img = new Image();
-        await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = () => rej(new Error('Render failed')); img.src = url; });
-        ctx.drawImage(img, 0, -i * size.height);
-        URL.revokeObjectURL(url);
-
-        const pngBlob = await new Promise<Blob>(res => canvas.toBlob(b => res(b || new Blob()), 'image/png'));
-        const pngImage = await pdfDoc.embedPng(await pngBlob.arrayBuffer());
-        const page = pdfDoc.addPage([size.width, size.height]);
-        page.drawImage(pngImage, { x: 0, y: 0, width: size.width, height: size.height });
+      const canvas = await html2canvas(oDoc.body, { width: size.width, windowWidth: size.width, scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      
+      setProgress(70);
+      const doc = new jsPDF({
+        orientation: size.width > size.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [size.width, size.height]
+      });
+      
+      const imgProps = doc.getImageProperties(imgData);
+      const pdfWidth = doc.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // Handle multi-page if content is longer than one page
+      let heightLeft = pdfHeight;
+      let position = 0;
+      
+      doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= doc.internal.pageSize.getHeight();
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight;
+        doc.addPage();
+        doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= doc.internal.pageSize.getHeight();
       }
 
       document.body.removeChild(offscreen);
       setProgress(95);
-      const pdfBytes = await pdfDoc.save();
-      setProcessedPDF(pdfBytes);
+      
+      const pdfBytes = doc.output('arraybuffer');
+      setProcessedPDF(new Uint8Array(pdfBytes));
       setShowFilenameDialog(true);
       setProgress(100); setIsProcessing(false);
     } catch (err) {

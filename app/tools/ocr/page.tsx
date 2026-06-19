@@ -10,6 +10,7 @@ import { FileList } from '@/components/pdf/file-list';
 import { ProcessingIndicator } from '@/components/pdf/processing-indicator';
 import { usePDFStore } from '@/lib/store/pdf-store';
 import { PDFDocument } from 'pdf-lib';
+import { pdfToImages } from '@/lib/pdf/convert';
 
 export default function OCRPage() {
   const { files, addFiles, removeFile, clearFiles, isProcessing, setProcessing, progress, setProgress, error, setError } = usePDFStore();
@@ -41,27 +42,31 @@ export default function OCRPage() {
       setProgress(10);
       const file = files[0].file;
       
-      setProgress(30);
-      const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      setProgress(20);
+      const images = await pdfToImages(file, 'png');
       
-      setProgress(50);
-      const pages = pdfDoc.getPages();
+      setProgress(40);
+      const Tesseract = await import('tesseract.js');
       let allText = '';
       
-      // Extract text from each page
-      pages.forEach((page, index) => {
-        allText += `\n--- Page ${index + 1} ---\n`;
+      for (let i = 0; i < images.length; i++) {
+        setProgress(40 + (i / images.length) * 40);
         
-        // Note: Basic text extraction. For true OCR, Tesseract.js would be needed
-        allText += `Page ${index + 1}: Content extraction in progress.\n`;
+        // Convert Blob to File/URL for Tesseract
+        const imageUrl = URL.createObjectURL(images[i]);
         
-        setProgress(50 + (index / pages.length) * 30);
-      });
+        try {
+          const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng', {
+            logger: m => console.log(m)
+          });
+          allText += `\n--- Page ${i + 1} ---\n\n${text}\n`;
+        } finally {
+          URL.revokeObjectURL(imageUrl);
+        }
+      }
       
-      // If no text extracted, add a message
       if (!allText.trim()) {
-        allText = 'No text found. This PDF may be image-based or scanned.\n\nFor full OCR (Optical Character Recognition) support with text extraction from images, please use Tesseract.js library integration.';
+        allText = 'No text could be extracted from this document.';
       }
       
       setProgress(80);

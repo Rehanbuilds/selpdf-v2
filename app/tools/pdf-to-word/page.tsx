@@ -10,7 +10,7 @@ import { FileList } from '@/components/pdf/file-list';
 import { ProcessingIndicator } from '@/components/pdf/processing-indicator';
 import { FilenameDialog } from '@/components/pdf/filename-dialog';
 import { usePDFStore } from '@/lib/store/pdf-store';
-import { PDFDocument } from 'pdf-lib';
+import { extractTextFromPDF } from '@/lib/pdf/convert';
 import { downloadPDF } from '@/lib/pdf/utils';
 
 export default function PDFToWordPage() {
@@ -44,25 +44,33 @@ export default function PDFToWordPage() {
       const file = files[0].file;
       
       setProgress(30);
-      const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pagesText = await extractTextFromPDF(file);
       
       setProgress(60);
-      // Extract text from PDF pages
-      const pageCount = pdfDoc.getPageCount();
-      const docml = `<?xml version="1.0" encoding="UTF-8"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:body>
-    <w:p><w:r><w:t>PDF Document Conversion</w:t></w:r></w:p>
-    <w:p><w:r><w:t>Total Pages: ${pageCount}</w:t></w:r></w:p>
-    <w:p><w:r><w:t>This document was converted from PDF format.</w:t></w:r></w:p>
-  </w:body>
-</w:document>`;
       
-      const docxData = new TextEncoder().encode(docml);
+      const { Document, Packer, Paragraph, TextRun } = await import('docx');
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: pagesText.map(
+              (text, index) =>
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `Page ${index + 1}`, bold: true }),
+                    new TextRun({ text: `\n\n${text}`, break: 1 }),
+                  ],
+                })
+            ),
+          },
+        ],
+      });
+      
+      const docxData = await Packer.toBuffer(doc);
+      const uint8Array = new Uint8Array(docxData);
       
       setProgress(80);
-      setProcessedFile(docxData);
+      setProcessedFile(uint8Array);
       setShowFilenameDialog(true);
       
       setProgress(100);

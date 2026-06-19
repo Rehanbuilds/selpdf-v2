@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,16 +27,26 @@ export function FilenameDialog({
   onCancel,
 }: FilenameDialogProps) {
   const [filename, setFilename] = useState(defaultFilename);
+  
+  // Extract extension from defaultFilename
+  const extMatch = defaultFilename.match(/\.[^.]+$/);
+  const ext = extMatch ? extMatch[0] : '.pdf';
+
+  useEffect(() => {
+    if (open) {
+      setFilename(defaultFilename);
+    }
+  }, [open, defaultFilename]);
 
   const handleConfirm = () => {
-    // Remove .pdf extension if user added it
+    // Remove extension if user added it
     let cleanFilename = filename.trim();
-    if (cleanFilename.toLowerCase().endsWith('.pdf')) {
-      cleanFilename = cleanFilename.slice(0, -4);
+    if (cleanFilename.toLowerCase().endsWith(ext.toLowerCase())) {
+      cleanFilename = cleanFilename.slice(0, -ext.length);
     }
     
-    // Add .pdf extension back
-    onConfirm(cleanFilename ? `${cleanFilename}.pdf` : defaultFilename);
+    // Add extension back
+    onConfirm(cleanFilename ? `${cleanFilename}${ext}` : defaultFilename);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -49,9 +59,9 @@ export function FilenameDialog({
     <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save PDF</DialogTitle>
+          <DialogTitle>Save File</DialogTitle>
           <DialogDescription>
-            Enter a name for your PDF file
+            Enter a name for your file
           </DialogDescription>
         </DialogHeader>
         
@@ -60,13 +70,13 @@ export function FilenameDialog({
           <div className="flex gap-2">
             <Input
               id="filename"
-              value={filename.replace('.pdf', '')}
+              value={filename.replace(new RegExp(`\\${ext}$`, 'i'), '')}
               onChange={(e) => setFilename(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter filename"
               autoFocus
             />
-            <span className="flex items-center text-muted-foreground">.pdf</span>
+            <span className="flex items-center text-muted-foreground">{ext}</span>
           </div>
         </div>
         

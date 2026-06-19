@@ -10,6 +10,7 @@ import { FileList } from '@/components/pdf/file-list';
 import { ProcessingIndicator } from '@/components/pdf/processing-indicator';
 import { FilenameDialog } from '@/components/pdf/filename-dialog';
 import { usePDFStore } from '@/lib/store/pdf-store';
+import { extractTextFromPDF } from '@/lib/pdf/convert';
 import { downloadPDF } from '@/lib/pdf/utils';
 
 export default function PDFToExcelPage() {
@@ -32,12 +33,21 @@ export default function PDFToExcelPage() {
       setProgress(10);
       
       const file = files[0].file;
-      const arrayBuffer = await file.arrayBuffer();
+      const pagesText = await extractTextFromPDF(file);
       
-      // Extract tables from PDF and create Excel file
       setProgress(50);
+      const XLSX = await import('xlsx');
+      const wb = XLSX.utils.book_new();
       
-      const excelData = new Uint8Array(arrayBuffer);
+      pagesText.forEach((text, index) => {
+        // Simple heuristic: split text by newlines and spaces to create a grid
+        const rows = text.split('\n').map(line => line.split(/\s{2,}/)); // Split by multiple spaces
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, `Page ${index + 1}`);
+      });
+      
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const excelData = new Uint8Array(excelBuffer);
       
       setProgress(80);
       setProcessedPDF(excelData);

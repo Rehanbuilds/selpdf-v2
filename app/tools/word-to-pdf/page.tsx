@@ -10,7 +10,6 @@ import { FileList } from '@/components/pdf/file-list';
 import { ProcessingIndicator } from '@/components/pdf/processing-indicator';
 import { FilenameDialog } from '@/components/pdf/filename-dialog';
 import { usePDFStore } from '@/lib/store/pdf-store';
-import { PDFDocument, rgb } from 'pdf-lib';
 import { downloadPDF } from '@/lib/pdf/utils';
 
 export default function WordToPDFPage() {
@@ -47,37 +46,34 @@ export default function WordToPDFPage() {
       console.log('[v0] Starting Word to PDF conversion');
       setProgress(10);
       
+      const file = files[0].file;
+      const arrayBuffer = await file.arrayBuffer();
+      
       setProgress(30);
-      const pdfDoc = await PDFDocument.create();
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer as any });
+      const text = result.value;
       
       setProgress(50);
-      const page = pdfDoc.addPage([595, 842]);
-      const { width, height } = page.getSize();
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
       
-      page.drawText('Word Document Conversion', {
-        x: 50,
-        y: height - 50,
-        size: 24,
-        color: rgb(0, 0, 0),
-      });
+      // Split text to fit within page width
+      const splitText = doc.splitTextToSize(text, 180);
       
-      page.drawText(files[0].file.name, {
-        x: 50,
-        y: height - 100,
-        size: 12,
-        color: rgb(0.5, 0.5, 0.5),
-      });
-      
-      page.drawText('This document was converted from Word format to PDF.', {
-        x: 50,
-        y: height - 150,
-        size: 12,
-        color: rgb(0, 0, 0),
-      });
+      let cursorY = 10;
+      for (let i = 0; i < splitText.length; i++) {
+        if (cursorY > 280) {
+          doc.addPage();
+          cursorY = 10;
+        }
+        doc.text(splitText[i], 10, cursorY);
+        cursorY += 7;
+      }
       
       setProgress(80);
-      const pdfData = await pdfDoc.save();
-      setProcessedPDF(pdfData);
+      const pdfData = doc.output('arraybuffer');
+      setProcessedPDF(new Uint8Array(pdfData));
       setShowFilenameDialog(true);
       
       setProgress(100);

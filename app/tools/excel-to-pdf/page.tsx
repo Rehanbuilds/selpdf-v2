@@ -34,13 +34,29 @@ export default function ExcelToPDFPage() {
       const file = files[0].file;
       const arrayBuffer = await file.arrayBuffer();
       
-      // Create PDF from Excel data
       setProgress(50);
+      const XLSX = await import('xlsx');
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
       
-      const pdfData = new Uint8Array(arrayBuffer);
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+      
+      const doc = new jsPDF();
+      if (data.length > 0) {
+        autoTable(doc, {
+          head: [data[0] as string[]],
+          body: data.slice(1) as any[][],
+        });
+      } else {
+        doc.text("No data found in Excel", 10, 10);
+      }
       
       setProgress(80);
-      setProcessedPDF(pdfData);
+      const pdfData = doc.output('arraybuffer');
+      setProcessedPDF(new Uint8Array(pdfData));
       setShowFilenameDialog(true);
       
       setProgress(100);

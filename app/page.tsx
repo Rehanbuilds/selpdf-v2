@@ -8,6 +8,7 @@ import { Footer } from '@/components/footer';
 import { AnimatedHero } from '@/components/animated-hero';
 import { AdBanner } from '@/components/ad-banner';
 import { pdfTools, toolCategories } from '@/lib/config/tools';
+import { HeroBackground } from '@/components/hero-background';
 
 export default function HomePage() {
   return (
@@ -16,7 +17,8 @@ export default function HomePage() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="mx-auto w-full flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 md:py-16 lg:px-8 lg:py-20">
+        <section className="relative overflow-hidden mx-auto w-full flex-col items-center gap-6 px-4 py-12 text-center sm:px-6 md:py-16 lg:px-8 lg:py-20">
+          <HeroBackground />
           <div className="mx-auto flex max-w-6xl flex-col gap-5">
             <div className="inline-flex items-center gap-2 self-center rounded-full border bg-muted px-4 py-1.5 text-sm">
               <Github className="size-4" />
