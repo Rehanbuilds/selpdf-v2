@@ -39,9 +39,47 @@ export default function PDFToPowerPointPage() {
       const pptxgen = (await import('pptxgenjs')).default;
       const pres = new pptxgen();
       
-      pagesText.forEach((text) => {
+      pagesText.forEach((text, index) => {
         const slide = pres.addSlide();
-        slide.addText(text, { x: 0.5, y: 0.5, w: '90%', h: '90%', fontSize: 14, align: 'left', valign: 'top' });
+        
+        // White background
+        slide.background = { color: 'FFFFFF' };
+
+        // Split paragraphs: first non-empty line = title, rest = body
+        const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+        const titleText = lines[0] || `Page ${index + 1}`;
+        const bodyLines = lines.slice(1);
+
+        // Blue accent bar at top
+        slide.addShape('rect' as any, { x: 0, y: 0, w: '100%', h: 0.18, fill: { color: '2980B9' } });
+
+        // Title
+        slide.addText(titleText, {
+          x: 0.4, y: 0.3, w: '92%', h: 0.8,
+          fontSize: 24, bold: true, color: '1A1A2E',
+          align: 'left', valign: 'top',
+        });
+
+        // Body
+        if (bodyLines.length > 0) {
+          slide.addText(bodyLines.join('\n'), {
+            x: 0.4, y: 1.3, w: '92%', h: '75%',
+            fontSize: 13, color: '363636',
+            align: 'left', valign: 'top',
+          });
+        } else if (!text.trim()) {
+          slide.addText(`[No text found on page ${index + 1}]`, {
+            x: 0.4, y: 1.3, w: '92%', h: '75%',
+            fontSize: 13, color: '999999',
+            align: 'left', valign: 'middle',
+          });
+        }
+
+        // Slide number
+        slide.addText(`${index + 1} / ${pagesText.length}`, {
+          x: 0, y: '90%', w: '100%', h: 0.3,
+          fontSize: 8, color: 'AAAAAA', align: 'right',
+        });
       });
       
       setProgress(80);

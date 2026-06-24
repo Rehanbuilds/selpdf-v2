@@ -40,8 +40,13 @@ export default function PDFToExcelPage() {
       const wb = XLSX.utils.book_new();
       
       pagesText.forEach((text, index) => {
-        // Simple heuristic: split text by newlines and spaces to create a grid
-        const rows = text.split('\n').map(line => line.split(/\s{2,}/)); // Split by multiple spaces
+        // Simple heuristic: split text by newlines and spaces/tabs to create a grid
+        const rows = text.split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => line.split(/\t| {2,}/));
+        
+        if (rows.length === 0) rows.push(['[No data found on this page]']);
         const ws = XLSX.utils.aoa_to_sheet(rows);
         XLSX.utils.book_append_sheet(wb, ws, `Page ${index + 1}`);
       });

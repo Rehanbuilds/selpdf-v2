@@ -37,21 +37,51 @@ export default function ExcelToPDFPage() {
       setProgress(50);
       const XLSX = await import('xlsx');
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
       
       const { jsPDF } = await import('jspdf');
-      const autoTable = (await import('jspdf-autotable')).default;
+      const { autoTable } = await import('jspdf-autotable');
       
-      const doc = new jsPDF();
-      if (data.length > 0) {
-        autoTable(doc, {
-          head: [data[0] as string[]],
-          body: data.slice(1) as any[][],
+      const doc = new jsPDF({ orientation: 'landscape' });
+      let firstSheet = true;
+      
+      for (const sheetName of workbook.SheetNames) {
+        const ws = workbook.Sheets[sheetName];
+        const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+        const rows = rawRows.filter(row => row && row.length > 0 && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
+        
+        if (!firstSheet) doc.addPage();
+        firstSheet = false;
+        
+        // Add sheet name header
+        doc.setFontSize(14);
+        doc.text(sheetName, 10, 10);
+        
+        // Ensure all rows have the same number of columns to prevent misaligned tables
+        let maxCols = 0;
+        rows.forEach(row => {
+          if (row.length > maxCols) maxCols = row.length;
         });
-      } else {
-        doc.text("No data found in Excel", 10, 10);
+        
+        const normalizedRows = rows.map(row => {
+          const newRow = [...row];
+          while (newRow.length < maxCols) {
+            newRow.push('');
+          }
+          return newRow;
+        });
+
+        if (normalizedRows.length > 0) {
+          autoTable(doc, {
+            head: [normalizedRows[0].map(cell => cell === undefined || cell === null ? '' : String(cell))],
+            body: normalizedRows.slice(1).map(row => row.map(cell => cell === undefined || cell === null ? '' : String(cell))),
+            startY: 16,
+            styles: { fontSize: 9 },
+            headStyles: { fillColor: [41, 128, 185] },
+          });
+        } else {
+          doc.setFontSize(10);
+          doc.text('No data found in this sheet.', 10, 20);
+        }
       }
       
       setProgress(80);

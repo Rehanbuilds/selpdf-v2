@@ -95,14 +95,9 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold">Resources</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <Link href="/docs" className="text-muted-foreground transition-colors hover:text-foreground">
                   Documentation
-                </a>
+                </Link>
               </li>
               <li>
                 <a

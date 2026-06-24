@@ -38,24 +38,92 @@ export default function PowerPointToPDFPage() {
       const JSZip = (await import('jszip')).default;
       const zip = await JSZip.loadAsync(arrayBuffer);
       
-      // Extract text from slides
-      const slideFiles = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
+      // Extract text from slides and sort them numerically
+      const slideFiles = Object.keys(zip.files)
+        .filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml') && !name.includes('/_rels/'))
+        .sort((a, b) => {
+          const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+          const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+          return numA - numB;
+        });
       
+      if (slideFiles.length === 0) {
+        throw new Error('No slides found in the PowerPoint file. Please ensure it is a valid .pptx file.');
+      }
+
       const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF({ orientation: 'landscape' });
+      // Landscape, standard widescreen slide dimensions
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
       
       for (let i = 0; i < slideFiles.length; i++) {
         if (i > 0) doc.addPage();
         
         const slideXml = await zip.files[slideFiles[i]].async('string');
-        const textMatches = slideXml.match(/<a:t>([\s\S]*?)<\/a:t>/g);
-        let slideText = "";
-        if (textMatches) {
-          slideText = textMatches.map(t => t.replace(/<\/?a:t>/g, '')).join(' ');
-        }
         
-        const splitText = doc.splitTextToSize(slideText || `Slide ${i + 1}`, 280);
-        doc.text(splitText, 10, 20);
+        // White background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pageW, pageH, 'F');
+
+        // Extract all text runs grouped by paragraph
+        const paragraphs: string[] = [];
+        const paragraphMatches = slideXml.match(/<a:p[\s\S]*?<\/a:p>/g) || [];
+        for (const para of paragraphMatches) {
+          const runs = para.match(/<a:t[^>]*>([\s\S]*?)<\/a:t>/g) || [];
+          let paraText = runs.map(r => r.replace(/<[^>]+>/g, '')).join('').trim();
+          
+          // Decode basic XML entities
+          paraText = paraText
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'");
+            
+          if (paraText) paragraphs.push(paraText);
+        }
+
+        // Heuristic: first paragraph is often the title
+        const title = paragraphs[0] || `Slide ${i + 1}`;
+        const bodyParagraphs = paragraphs.slice(1);
+
+        // Draw accent bar at top
+        doc.setFillColor(41, 128, 185);
+        doc.rect(0, 0, pageW, 12, 'F');
+
+        // Slide number in accent bar
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.text(`${i + 1} / ${slideFiles.length}`, pageW - 8, 8, { align: 'right' });
+
+        // Title
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(20);
+        const titleLines = doc.splitTextToSize(title, pageW - 24);
+        doc.text(titleLines, 12, 26);
+
+        // Divider
+        const titleBlockH = Math.max(10, titleLines.length * 8);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(12, 18 + titleBlockH, pageW - 12, 18 + titleBlockH);
+
+        // Body text
+        let yPos = 22 + titleBlockH;
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        for (const para of bodyParagraphs) {
+          if (yPos > pageH - 16) break;
+          const lines = doc.splitTextToSize(`• ${para}`, pageW - 28);
+          doc.text(lines, 16, yPos);
+          yPos += lines.length * 6 + 3;
+        }
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text(file.name.replace(/\.pptx?$/i, ''), 12, pageH - 5);
       }
       
       setProgress(80);
