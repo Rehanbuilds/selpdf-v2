@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://selfpdf.com/sitemap.xml
+
+# Disallow crawling of internal routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /__next/
+
+# Allow all search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
