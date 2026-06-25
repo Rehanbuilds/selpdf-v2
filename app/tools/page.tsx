@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { pdfTools, toolCategories } from '@/lib/config/tools';
+import { AdBanner } from '@/components/ad-banner';
 
 export default function AllToolsPage() {
   return (
@@ -20,6 +21,15 @@ export default function AllToolsPage() {
               <p className="text-lg text-muted-foreground">
                 Complete collection of professional PDF tools. All free, all fast, all private.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Ad Banner - Above Tools */}
+        <section className="border-b py-6 md:py-8">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center">
+              <AdBanner key_id="6b939467d03b6dd2e5b236abbd2042f4" width={468} height={60} />
             </div>
           </div>
         </section>
@@ -68,6 +78,15 @@ export default function AllToolsPage() {
             </section>
           );
         })}
+
+        {/* Ad Banner - Below Tools */}
+        <section className="border-t py-6 md:py-8">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-center">
+              <AdBanner key_id="6b939467d03b6dd2e5b236abbd2042f4" width={468} height={60} />
+            </div>
+          </div>
+        </section>
       </main>
       
       <Footer />
