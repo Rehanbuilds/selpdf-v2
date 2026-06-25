@@ -39,7 +39,8 @@ export default function ExcelToPDFPage() {
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       
       const { jsPDF } = await import('jspdf');
-      const { autoTable } = await import('jspdf-autotable');
+      const autoTableModule = await import('jspdf-autotable');
+      const autoTable = autoTableModule.default || (autoTableModule as any).autoTable || autoTableModule;
       
       const doc = new jsPDF({ orientation: 'landscape' });
       let firstSheet = true;

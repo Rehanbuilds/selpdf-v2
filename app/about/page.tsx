@@ -104,7 +104,7 @@ export default function AboutPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer">
                   <Github className="mr-2 size-4" />
                   View Source Code
                 </a>
@@ -339,7 +339,7 @@ export default function AboutPage() {
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer">
                   <Github className="mr-2 size-4" />
                   Contribute on GitHub
                 </a>

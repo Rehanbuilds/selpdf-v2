@@ -36,8 +36,9 @@ export default function PDFToPowerPointPage() {
       const pagesText = await extractTextFromPDF(file);
       
       setProgress(50);
-      const pptxgen = (await import('pptxgenjs')).default;
-      const pres = new pptxgen();
+      const pptxgenModule = await import('pptxgenjs');
+      const PptxGenJS = pptxgenModule.default || pptxgenModule;
+      const pres = new (PptxGenJS as any)();
       
       pagesText.forEach((text, index) => {
         const slide = pres.addSlide();

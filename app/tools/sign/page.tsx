@@ -37,7 +37,7 @@ export default function SignPDFPage() {
     const ctx = canvasRef.current.getContext('2d');
     if (ctx) {
       ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
+      ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     }
   };
 
@@ -49,7 +49,7 @@ export default function SignPDFPage() {
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
       ctx.stroke();
     }
   };

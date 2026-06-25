@@ -662,7 +662,7 @@ export default function DocsPage() {
 
                 <div className="rounded-xl border bg-zinc-950 p-6 font-mono text-sm text-zinc-100">
                   <p className="mb-1 text-zinc-500"># Clone the repository</p>
-                  <p className="mb-4 text-green-400">git clone https://github.com/your-org/selfpdf.git</p>
+                  <p className="mb-4 text-green-400">git clone https://github.com/Rehanbuilds/selpdf-v2.git</p>
                   <p className="mb-1 text-zinc-500"># Install dependencies</p>
                   <p className="mb-4">npm install</p>
                   <p className="mb-1 text-zinc-500"># Run in development mode</p>
@@ -703,7 +703,7 @@ export default function DocsPage() {
 
                 <div className="mt-6">
                   <Button asChild>
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer">
                       <Github className="mr-2 size-4" />
                       View on GitHub
                     </a>

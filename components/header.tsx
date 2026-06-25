@@ -33,7 +33,7 @@ export function Header() {
           
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="rounded-lg" asChild>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
                 <Github className="size-5" />
               </a>
             </Button>

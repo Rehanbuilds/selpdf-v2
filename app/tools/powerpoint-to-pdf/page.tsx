@@ -35,7 +35,8 @@ export default function PowerPointToPDFPage() {
       const arrayBuffer = await file.arrayBuffer();
       
       setProgress(30);
-      const JSZip = (await import('jszip')).default;
+      const jszipModule = await import('jszip');
+      const JSZip = jszipModule.default || jszipModule;
       const zip = await JSZip.loadAsync(arrayBuffer);
       
       // Extract text from slides and sort them numerically

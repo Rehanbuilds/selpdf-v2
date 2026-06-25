@@ -176,7 +176,7 @@ export default function PrivacyPage() {
               <p>
                 Because SelfPDF is fully open source, you don\'t have to take our word for any of this. You can inspect exactly how the application works,
                 verify that no data leaves your browser, and even run your own private instance. The source code is available on{' '}
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
+                <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
                   GitHub
                 </a>
                 .
@@ -211,7 +211,7 @@ export default function PrivacyPage() {
               <h2>12. Contact</h2>
               <p>
                 If you have any questions, concerns, or requests regarding this Privacy Policy, please open an issue on our{' '}
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
+                <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
                   GitHub repository
                 </a>
                 . This is the fastest way to get a response from the maintainers.

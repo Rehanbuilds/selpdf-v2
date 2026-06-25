@@ -24,7 +24,7 @@ export function Footer() {
             </p>
             <div className="flex gap-2">
               <a
-                href="https://github.com"
+                href="https://github.com/Rehanbuilds/selpdf-v2"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-9 items-center justify-center rounded-lg border bg-background transition-colors hover:bg-accent"
@@ -101,7 +101,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com"
+                  href="https://github.com/Rehanbuilds/selpdf-v2"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground transition-colors hover:text-foreground"
@@ -111,7 +111,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com"
+                  href="https://github.com/Rehanbuilds/selpdf-v2"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground transition-colors hover:text-foreground"

@@ -243,7 +243,7 @@ export default function TermsPage() {
                   <h2 id="contact">12. Contact</h2>
                   <p>
                     For questions, concerns, or requests related to these Terms of Service, please open an issue on our{' '}
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
+                    <a href="https://github.com/Rehanbuilds/selpdf-v2" target="_blank" rel="noopener noreferrer" className="text-primary no-underline hover:underline">
                       GitHub repository
                     </a>
                     . This ensures your question is visible to all maintainers and receives the fastest possible response.

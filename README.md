@@ -1,7 +1,7 @@
 # SelfPDF - The Ultimate Open-Source PDF Toolkit
 
 <p align="center">
-  <img src="public/favicon.ico" alt="SelfPDF Logo" width="100"/>
+  <img src="public/selfpdf-logo.png" alt="SelfPDF Logo" width="100"/>
 </p>
 
 <p align="center">
@@ -78,7 +78,7 @@ Clone the repository and install the dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/selfpdf.git
+git clone https://github.com/Rehanbuilds/selpdf-v2.git
 cd selfpdf
 
 # Install dependencies using your preferred package manager
@@ -164,5 +164,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  <b>Built with ❤️ for privacy and the open-source community.</b>
+  <b>Built with ❤️ for privacy and the open-source community.</b><br/>
+  <b>Built by Rehan Builds</b>
 </p>
