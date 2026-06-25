@@ -8,6 +8,7 @@ import { Footer } from '@/components/footer';
 import { AnimatedHero } from '@/components/animated-hero';
 import { pdfTools, toolCategories } from '@/lib/config/tools';
 import { HeroBackground } from '@/components/hero-background';
+import { AdBanner } from '@/components/ad-banner';
 
 export default function HomePage() {
   return (
@@ -45,6 +46,11 @@ export default function HomePage() {
           
           {/* Animated Hero Graphic */}
           <AnimatedHero />
+
+          {/* Ad Banner - Hero Section End */}
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-8">
+            <AdBanner key_id="47b5d1741bfeecb9a4fdc29f25ad4c10" width={728} height={90} />
+          </div>
         </section>
 
         {/* Features Grid */}
@@ -327,6 +333,11 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Ad Banner - CTA Section End */}
+            <div className="mt-12 flex justify-center">
+              <AdBanner key_id="47b5d1741bfeecb9a4fdc29f25ad4c10" width={728} height={90} />
+            </div>
           </div>
         </section>
       </main>
